@@ -1,0 +1,354 @@
+
+//  ContentView.swift
+//  praca mag
+//
+//  Created by Marco Nowak on 22/03/2023.
+//
+
+import SwiftUI
+
+
+struct ContentView: View {
+    
+    
+    @State private var nazwaRosliny = "wybierz"
+    @State private var poprzedniaRoslina = "wybierz"
+    @State private var klasaGleby = "Umiarkowana"
+    @State private var ph = "6.5"
+    @State private var obornik = "nie stosowano"
+    @State private var poprzedniObornik = "nie stosowano"
+    @State private var slomaNaPolu = true
+    @State private var poziomZasobnosci = "niski"
+    @State private var oczekiwanyPlon = "wybierz"
+    @State private var poprzedniPlon = "wybierz"
+    @State private var dawkaObornik = "wybierz"
+    @State private var poprzedniaDawkaObornik = "wybierz"
+    @State private var wynik = ""
+    @State private var showModal = false
+    @State private var result = ""
+    @State private var opis = ""
+    @State private var numberOfHectares = ""
+    
+    func onWyslijButtonClick() {
+        
+        let pole = Pole(roslina: nazwaRosliny, poprzedniaRoslina: poprzedniaRoslina, klasaGleby: klasaGleby, slomaNaPolu: slomaNaPolu, poziomZasobnosci: poziomZasobnosci, ph: ph, obornik: obornik, dawkaObornik: dawkaObornik, oczekiwanyPlon: oczekiwanyPlon, poprzedniPlon: poprzedniPlon, poprzedniObornik: poprzedniObornik, poprzedniaDawkaObornik: poprzedniaDawkaObornik)
+        
+        let nawozy = doradztwoNawozowe(pole,ph:Double(ph) ?? 0.0, oczekiwanyPlon:Double(oczekiwanyPlon) ?? 0.0,poprzedniPlon:Double(poprzedniPlon) ?? 0.0, dawkaObornik:Double(dawkaObornik) ?? 0.0, poprzedniaDawkaObornik:Double (poprzedniaDawkaObornik) ?? 0.0, poprzedniaRoslina: poprzedniaRoslina,poprzedniObornik: poprzedniObornik, obornik: obornik)
+        
+
+        print(nawozy) // drukowanie wyniku do konsoli
+        $wynik.wrappedValue = nawozy.map { "\($0.typ): \($0.ilosc) kg/ha" }.joined(separator: "\n")
+        $opis.wrappedValue = opis
+        // dalsza część kodu
+    }
+    
+    func onWyczyscButtonClick()  {
+        nazwaRosliny = "wybierz"
+        klasaGleby = "Umiarkowana"
+        obornik = "nie stosowano"
+        dawkaObornik = "wybierz"
+        slomaNaPolu = true
+        poprzedniObornik = "nie stosowano"
+        poprzedniaDawkaObornik = "wybierz"
+        poziomZasobnosci = "niski"
+        oczekiwanyPlon = "wybierz"
+        wynik = ""
+        numberOfHectares = ""
+        result = ""
+    }
+    
+    func onpowrotButtonClick(){
+        nazwaRosliny = "wybierz"
+        klasaGleby = "Umiarkowana"
+        obornik = "nie stosowano"
+        dawkaObornik = "wybierz"
+        slomaNaPolu = true
+        poprzedniObornik = "nie stosowano"
+        poprzedniaDawkaObornik = "wybierz"
+        poziomZasobnosci = "niski"
+        oczekiwanyPlon = "wybierz"
+        wynik = ""
+        numberOfHectares = ""
+        result = ""
+    }
+    
+    var body: some View {
+        VStack {
+            HStack {
+                
+                Text("Roślina:")
+                Spacer()
+                Picker(selection: $nazwaRosliny, label: Text("")) {
+                    Text("Pszenica").tag("pszenica")
+                    Text("Rzepak").tag("rzepak")
+                    Text("Kukurydza").tag("kukurydza")
+                    Text("wybierz").tag("wybierz")
+                }
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("roslinaPicker")
+            }
+            HStack {
+                Text("Klasa gleby:")
+                Spacer()
+                Picker(selection: $klasaGleby, label: Text("")) {
+                    Text("Żyzna").tag("Zyzna")
+                    Text("Umiarkowana").tag("Umiarkowana")
+                    Text("Uboga").tag("Uboga")
+                }
+                
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("klasaGlebyPicker")
+            }
+            HStack {
+                let values = ["świński","krowi", "konny","nie stosowano"]
+                HStack {
+                    Text("Wybierz obornik:")
+                    Spacer()
+                    Picker(selection: $obornik, label: Text("")) {
+                        ForEach(values, id: \.self) {
+                            Text($0).tag($0)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("obornikPicker")
+            }
+            HStack {
+                let values = ["wybierz","5", "7.5", "10", "12.5", "15", "17.5", "20", "22.5", "25", "27.5", "30", "32.5", "35", "37.5", "40", "42.5", "45", "47.5", "50"]
+
+
+                HStack {
+                    Text("Dawka obornika:")
+                    Spacer()
+                    Picker(selection: $dawkaObornik, label: Text("")) {
+                        ForEach(values, id: \.self) {
+                            Text($0).tag($0)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("dawkaObornikPicker")
+            }
+            HStack {
+                let values = ["wybierz","2","2.5","3","3.5", "4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5", "15"]
+                HStack {
+                    Text("Oczekiwany plon w t/ha:")
+                    Spacer()
+                    Picker(selection: $oczekiwanyPlon, label: Text("")) {
+                        ForEach(values, id: \.self) {
+                            Text($0).tag($0)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("oczekiwanyPlonPicker")
+            }
+            HStack {
+                
+                Text("Poprzednia Roślina:")
+                Spacer()
+                Picker(selection: $poprzedniaRoslina, label: Text("")) {
+                    Text("Pszenica").tag("pszenica")
+                    Text("Rzepak").tag("rzepak")
+                    Text("Kukurydza").tag("kukurydza")
+                    Text("wybierz").tag("wybierz")
+                }
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("poprzedniaRoslinaPicker")
+            }
+            HStack {
+                let values = ["wybierz","2","2.5","3","3.5", "4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5", "15"]
+                HStack {
+                    Text("Poprzedni plon w t/ha:")
+                    Spacer()
+                    Picker(selection: $poprzedniPlon, label: Text("")) {
+                        ForEach(values, id: \.self) {
+                            Text($0).tag($0)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("poprzedniPlonPicker")
+            }
+            HStack {
+                let values = ["świński","krowi", "konny","nie stosowano"]
+                HStack {
+                    Text("Wybierz poprzedni obornik:")
+                    Spacer()
+                    Picker(selection: $poprzedniObornik, label: Text("")) {
+                        ForEach(values, id: \.self) {
+                            Text($0).tag($0)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                
+                .pickerStyle(MenuPickerStyle())
+                .accessibilityIdentifier("poprzedniObornikPicker")
+            }
+            HStack {
+                let values = ["wybierz","5", "7.5", "10", "12.5", "15", "17.5", "20", "22.5", "25", "27.5", "30", "32.5", "35", "37.5", "40", "42.5", "45", "47.5", "50"]
+                
+
+                    HStack {
+                        Text("Dawka obornika:")
+                        Spacer()
+                        Picker(selection: $poprzedniaDawkaObornik, label: Text("")) {
+                            ForEach(values, id: \.self) {
+                                Text($0).tag($0)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                    
+                    .pickerStyle(MenuPickerStyle())
+                    .accessibilityIdentifier("poprzedniaDawkaObornikPicker")
+                }
+            VStack {
+
+                HStack {
+                    Text("Słoma na polu:")
+                    Spacer()
+                    Toggle(isOn: $slomaNaPolu) {
+                        Text("")
+                    }
+                    .accessibilityIdentifier("slomaNaPoluSwitch")
+                }
+            
+                HStack {
+                    let values = (40...79).map { String(format: "%.1f", Double($0) / 10) }
+
+                    HStack {
+                        Text("Wybierz poziom PH gleby:")
+                        Spacer()
+                        Picker(selection: $ph, label: Text("")) {
+                             ForEach(values, id: \.self) {
+                                Text($0).tag($0)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                    
+                    .pickerStyle(MenuPickerStyle())
+                    .accessibilityIdentifier("phPicker")
+                }
+                HStack {
+                    Text("Zasobność gleby:")
+                    Spacer()
+                    Picker(selection: $poziomZasobnosci, label: Text("")) {
+                        Text("Niska").tag("niski")
+                        Text("Średnia").tag("średni")
+                        Text("Wysoka").tag("wysoki")
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .accessibilityIdentifier("poziomZasobnosciSegmentedControl")
+                }
+
+                    
+                Spacer()
+                    
+                    HStack {
+
+                        Button(action: {
+                            let pole = Pole(roslina: nazwaRosliny, poprzedniaRoslina: poprzedniaRoslina, klasaGleby: klasaGleby, slomaNaPolu: slomaNaPolu, poziomZasobnosci: poziomZasobnosci, ph: ph, obornik: obornik, dawkaObornik: dawkaObornik, oczekiwanyPlon: oczekiwanyPlon, poprzedniPlon: poprzedniPlon, poprzedniObornik: poprzedniObornik, poprzedniaDawkaObornik: poprzedniaDawkaObornik)
+                            let nawozy = doradztwoNawozowe(pole,ph:Double(ph) ?? 0.0, oczekiwanyPlon:Double(oczekiwanyPlon) ?? 0.0,poprzedniPlon:Double(poprzedniPlon) ?? 0.0, dawkaObornik:Double(dawkaObornik) ?? 0.0, poprzedniaDawkaObornik:Double (poprzedniaDawkaObornik) ?? 0.0, poprzedniaRoslina: poprzedniaRoslina,poprzedniObornik: poprzedniObornik, obornik: obornik)
+                            let opis = opisNawozow(nawozy, klasaGleby: klasaGleby, ph: Double(ph) ?? 0.0)
+
+                            $result.wrappedValue = "\(opis)\n" + nawozy.map {"\($0.typ): \(Double($0.ilosc)) kg/ha"}.joined(separator: "\n")
+                            showModal = true
+                        }) {
+                            Text("Oblicz")
+                        
+                                .foregroundColor(.white)
+                                .frame(width: 120, height: 80)
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                                .accessibilityIdentifier("wyslijButton")
+                                
+                        }
+                        .padding()
+                        
+                        Button(action: onWyczyscButtonClick) {
+                            Text("Wyczyść")
+                                .foregroundColor(.white)
+                                .frame(width: 120, height: 80)
+                                .background(Color.red)
+                                .cornerRadius(10)
+                                .accessibilityIdentifier("wyczyscButton")
+                                
+                        }
+                        .padding()
+                                
+                        if showModal {
+                            Text(result)
+                            .padding()}
+                        
+                    }
+                    .sheet(isPresented: $showModal) {
+                        VStack {
+                            Text(result)
+                                .padding()
+                            
+                            TextField("Wpisz liczbę hektarów", text: $numberOfHectares)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .padding()
+                                .keyboardType(.decimalPad)
+                            HStack {
+                                Button(action: {
+                                    let pole = Pole(roslina: nazwaRosliny, poprzedniaRoslina: poprzedniaRoslina, klasaGleby: klasaGleby, slomaNaPolu: slomaNaPolu, poziomZasobnosci: poziomZasobnosci, ph: ph, obornik: obornik, dawkaObornik: dawkaObornik, oczekiwanyPlon: oczekiwanyPlon, poprzedniPlon: poprzedniPlon, poprzedniObornik: poprzedniObornik, poprzedniaDawkaObornik: poprzedniaDawkaObornik)
+                                    let nawozy = doradztwoNawozowe(pole,ph:Double(ph) ?? 0.0, oczekiwanyPlon:Double(oczekiwanyPlon) ?? 0.0,poprzedniPlon:Double(poprzedniPlon) ?? 0.0, dawkaObornik:Double(dawkaObornik) ?? 0.0, poprzedniaDawkaObornik:Double (poprzedniaDawkaObornik) ?? 0.0, poprzedniaRoslina: poprzedniaRoslina,poprzedniObornik: poprzedniObornik, obornik: obornik)
+                                    let opis = opisNawozow(nawozy, klasaGleby: klasaGleby, ph: Double(ph) ?? 0.0)
+
+                                    $result.wrappedValue = "\(opis)\n" + nawozy.map {"\($0.typ): \(Double($0.ilosc) * (Double(numberOfHectares) ?? 1.0 )) kg"}.joined(separator: "\n")
+
+
+                                    showModal = true
+                                }) {
+                                    Text("Wyślij")
+                                    
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .cornerRadius(10)
+                                        .accessibilityIdentifier("wyslijButton")
+                                }
+                                .padding(.horizontal)
+                                
+                                
+                                Button(action: {
+                                    showModal = false
+                                }) {
+                                    Text("Powrót")
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .cornerRadius(10)
+                                        .accessibilityIdentifier("powrotButton")
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                            }
+                        
+                }
+            
+                
+        }.padding(.horizontal).padding(.top)
+            
+        }
+        
+    }
+    
+    struct ContentView_Previews: PreviewProvider {
+        static var previews: some View {ContentView()
+        }
+    }
+
