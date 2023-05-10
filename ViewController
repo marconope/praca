@@ -1,0 +1,62 @@
+//
+//  ViewController..swift
+//  praca mag
+//
+//  Created by Marco Nowak on 22/03/2023.
+//
+import SwiftUI
+
+class ViewController: UIViewController {
+
+    @IBOutlet weak var roslinaTextField: UITextField!
+    @IBOutlet weak var poprzedniaRoslinaTextField: UITextField!
+    @IBOutlet weak var klasaGlebyTextField: UITextField!
+    @IBOutlet weak var phTextField: UITextField!
+    @IBOutlet weak var obornikTextField: UITextField!
+    @IBOutlet weak var poprzedniObornikTextField: UITextField!
+    @IBOutlet weak var slomaNaPoluSwitch: UISwitch!
+    @IBOutlet weak var poziomZasobnosciSegmentedControl: UISegmentedControl!
+    @IBOutlet weak var oczekiwanyPlonTextField: UITextField!
+    @IBOutlet weak var poprzedniPlonTextField: UITextField!
+    @IBOutlet weak var dawkaObornikTextField: UITextField!
+    @IBOutlet weak var poprzedniaDawkaObornikTextField: UITextField!
+    @IBOutlet weak var wynikTextView: UITextView!
+
+    @IBAction func wyslijButtonPressed(_ sender: Any) {
+        
+        let roslina = roslinaTextField.text ?? ""
+        let poprzedniaRoslina = poprzedniaRoslinaTextField.text ?? ""
+        let klasaGleby = klasaGlebyTextField.text ?? ""
+        let ph = phTextField.text ?? ""
+        let obornik = obornikTextField.text ?? ""
+        let poprzedniObornik = poprzedniObornikTextField.text ?? ""
+        let slomaNaPolu = slomaNaPoluSwitch.isOn
+        let poziomZasobnosciIndex = poziomZasobnosciSegmentedControl.selectedSegmentIndex
+        let poziomZasobnosci = ["niski", "średni", "wysoki"][poziomZasobnosciIndex]
+        let oczekiwanyPlon = oczekiwanyPlonTextField.text ?? ""
+        let poprzedniPlon = poprzedniPlonTextField.text ?? ""
+        let dawkaObornik = dawkaObornikTextField.text ?? ""
+        let poprzedniaDawkaObornik = poprzedniaDawkaObornikTextField.text ?? ""
+        
+        let pole = Pole(roslina: roslina,poprzedniaRoslina:poprzedniaRoslina, klasaGleby: klasaGleby, slomaNaPolu: slomaNaPolu, poziomZasobnosci: poziomZasobnosci,ph:ph, obornik:obornik, dawkaObornik:dawkaObornik, oczekiwanyPlon: oczekiwanyPlon, poprzedniPlon: poprzedniPlon,poprzedniObornik: poprzedniObornik, poprzedniaDawkaObornik: poprzedniaDawkaObornik)
+
+        let nawozy = doradztwoNawozowe(pole,ph:Double(ph) ?? 0.0, oczekiwanyPlon:Double(oczekiwanyPlon) ?? 0.0,poprzedniPlon:Double(poprzedniPlon) ?? 0.0, dawkaObornik:Double(dawkaObornik) ?? 0.0, poprzedniaDawkaObornik:Double (poprzedniaDawkaObornik) ?? 0.0, poprzedniaRoslina: poprzedniaRoslina,poprzedniObornik: poprzedniObornik, obornik: obornik)
+
+        var resultText = ""
+        if nawozy.isEmpty {
+            resultText = "Nie znaleziono rekomendacji nawozu dla podanych danych."
+        } else {
+            resultText = "Rekomendowane nawozy:\n"
+            for nawoz in nawozy {
+                resultText += "\(nawoz.typ): \(nawoz.ilosc) kg/ha\n"
+            }
+        }
+        wynikTextView.text = resultText
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+    }
+}
+
