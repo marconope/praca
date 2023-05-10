@@ -1,0 +1,507 @@
+struct Nawoz {
+    let typ: String
+    var ilosc: Int
+    
+}
+
+struct Pole {
+    let roslina: String
+    let poprzedniaRoslina: String
+    let klasaGleby: String
+    let slomaNaPolu: Bool
+    let poziomZasobnosci: String
+    let ph: String
+    let obornik: String
+    let dawkaObornik: String
+    let oczekiwanyPlon: String
+    let poprzedniPlon: String
+    let poprzedniObornik: String
+    let poprzedniaDawkaObornik: String
+    
+}
+
+func doradztwoNawozowe(_ pole: Pole, ph: Double, oczekiwanyPlon: Double, poprzedniPlon: Double, dawkaObornik: Double, poprzedniaDawkaObornik: Double, poprzedniaRoslina: String, poprzedniObornik: String, obornik: String) -> [Nawoz] {
+    switch pole.roslina {
+    case "kukurydza":
+        return doradztwoNawozoweKukurydza(pole, ph: ph, oczekiwanyPlon: oczekiwanyPlon, poprzedniPlon: poprzedniPlon, dawkaObornik: dawkaObornik, poprzedniaDawkaObornik: poprzedniaDawkaObornik, poprzedniaRoslina: poprzedniaRoslina, poprzedniObornik: poprzedniObornik, obornik: obornik)
+    case "pszenica":
+        return doradztwoNawozowePszenica(pole, ph: ph, oczekiwanyPlon: oczekiwanyPlon, poprzedniPlon: poprzedniPlon, dawkaObornik: dawkaObornik, poprzedniaDawkaObornik: poprzedniaDawkaObornik, poprzedniaRoslina: poprzedniaRoslina, poprzedniObornik: poprzedniObornik, obornik: obornik)
+    case "rzepak":
+        return doradztwoNawozoweRzepak(pole,oczekiwanyPlon: oczekiwanyPlon)
+    default:
+        return []
+    }
+}
+
+func doradztwoNawozoweKukurydza(_ pole: Pole, ph: Double, oczekiwanyPlon: Double, poprzedniPlon: Double, dawkaObornik: Double, poprzedniaDawkaObornik: Double, poprzedniaRoslina: String, poprzedniObornik: String, obornik: String) -> [Nawoz] {
+    func calculateNitrogenDose(_ oczekiwanyPlon: Double) -> Double {
+        var nitrogenDose: Double = 0.0
+        if oczekiwanyPlon <= 6.0 {
+            nitrogenDose = oczekiwanyPlon * 20.0
+        } else {
+            nitrogenDose = (oczekiwanyPlon - 5.0) * 30.0
+        }
+        return nitrogenDose
+    }
+    
+    func calculateNitrogenLeft(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+        var nitrogenLeft: Double = 0.0
+        if poprzedniaRoslina == "pszenica" {
+            nitrogenLeft = poprzedniPlon * 2.0
+        }
+        else if poprzedniaRoslina == "rzepak" {
+            nitrogenLeft = poprzedniPlon * 2.0
+        }
+        else {
+            nitrogenLeft = poprzedniPlon * 2.0
+        }
+        return nitrogenLeft
+    }
+    func calculatep205Left(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+        var p205Left: Double = 0.0
+        if poprzedniaRoslina == "pszenica" {
+            p205Left = poprzedniPlon * 3.0 }
+        else if poprzedniaRoslina == "rzepak" {
+            p205Left = poprzedniPlon * 3.0 }
+        else {
+            p205Left = poprzedniPlon * 2.5 }
+        return p205Left
+    }
+    func calculatek2oLeft(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+        var k2oLeft: Double = 0.0
+        if poprzedniaRoslina == "pszenica" {
+            k2oLeft = poprzedniPlon * 13.0 }
+        else if poprzedniaRoslina == "rzepak" {
+            k2oLeft = poprzedniPlon * 20.0 }
+        else {
+            k2oLeft = poprzedniPlon * 20.0 }
+        return k2oLeft
+    }
+    func calculatemgoLeft(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+        var mgoLeft: Double = 0.0
+        if poprzedniaRoslina == "pszenica" {
+            mgoLeft = poprzedniPlon * 2.0 }
+        else if poprzedniaRoslina == "rzepak" {
+            mgoLeft = poprzedniPlon * 1.5 }
+        else {
+            mgoLeft = poprzedniPlon * 2.5 }
+        return mgoLeft
+    }
+    func calculatezawartoscAzotuWOborniku(_ dawkaObornik: Double, obornik: String) -> Double {
+        var zawartoscAzotuWOborniku: Double = 0.0
+            if obornik == "krowi" {
+                zawartoscAzotuWOborniku = dawkaObornik * 4.7 * 0.3
+                p205Demand -= dawkaObornik * 2.8 * 0.4
+                k2oDemand -= dawkaObornik * 6.5 * 0.5
+                mgoDemand -= dawkaObornik * 1.5 * 0.3
+            }
+            else if obornik == "świński" {
+                zawartoscAzotuWOborniku = dawkaObornik * 5.1 * 0.3
+                p205Demand -= dawkaObornik * 4.4 * 0.4
+                k2oDemand -= dawkaObornik * 6.8 * 0.5
+                mgoDemand -= dawkaObornik * 1.8 * 0.3
+            }
+            else if obornik == "konny" {
+                zawartoscAzotuWOborniku = dawkaObornik * 5.4 * 0.3
+                p205Demand -= dawkaObornik * 2.9 * 0.4
+                k2oDemand -= dawkaObornik * 9.0 * 0.5
+                mgoDemand -= dawkaObornik * 1.6 * 0.3
+            }
+            return zawartoscAzotuWOborniku
+        }
+    func calculatepoprzedniazawartoscAzotuWOborniku(_ poprzedniaDawkaObornik: Double, poprzedniObornik: String) -> Double {
+        var poprzedniazawartoscAzotuWOborniku: Double = 0.0
+        if poprzedniObornik == "krowi" {
+            poprzedniazawartoscAzotuWOborniku = poprzedniaDawkaObornik * 4.7 * 0.35
+            p205Demand -= poprzedniaDawkaObornik * 2.8 * 0.3
+            k2oDemand -= poprzedniaDawkaObornik * 6.5 * 0.3
+            mgoDemand -= poprzedniaDawkaObornik * 1.5 * 0.3
+        }
+            else if poprzedniObornik == "świński" {
+                poprzedniazawartoscAzotuWOborniku = poprzedniaDawkaObornik * 5.1 * 0.3
+                p205Demand -= poprzedniaDawkaObornik * 4.4 * 0.3
+                k2oDemand -= poprzedniaDawkaObornik * 6.8 * 0.3
+                mgoDemand -= poprzedniaDawkaObornik * 1.8 * 0.3}
+            else if poprzedniObornik == "konny" {
+                poprzedniazawartoscAzotuWOborniku = poprzedniaDawkaObornik * 5.4 * 0.3
+                p205Demand -= poprzedniaDawkaObornik * 2.9 * 0.3
+                k2oDemand -= poprzedniaDawkaObornik * 9.0 * 0.3
+                mgoDemand -= poprzedniaDawkaObornik * 1.6 * 0.3}
+            return poprzedniazawartoscAzotuWOborniku
+        }
+
+
+    
+    var p205Demand = oczekiwanyPlon * 11.0
+    var k2oDemand = oczekiwanyPlon * 22.0
+    var mgoDemand = oczekiwanyPlon * 6.0
+    var nitrogenDose = calculateNitrogenDose(oczekiwanyPlon)
+    let nitrogenLeft = calculateNitrogenLeft(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+    let p205Left = calculatep205Left(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+    let k2oLeft = calculatek2oLeft(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+    let mgoLeft = calculatemgoLeft(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+    let nitrogenfromManure = calculatepoprzedniazawartoscAzotuWOborniku(poprzedniaDawkaObornik, poprzedniObornik: poprzedniObornik) + calculatezawartoscAzotuWOborniku(dawkaObornik, obornik: obornik)
+   
+    var nawozy = [Nawoz]()
+    switch pole.klasaGleby {
+        case "Zyzna":
+        nitrogenDose += 20
+        p205Demand += 30
+        case "Umiarkowana":
+        nitrogenDose += 15
+        p205Demand += 20
+        case "Uboga":
+        nitrogenDose += 10
+        p205Demand += 10
+            default:
+        return nawozy
+            }
+    
+    
+    switch pole.poziomZasobnosci {
+    case "wysoki":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int((nitrogenDose-nitrogenLeft-nitrogenfromManure) * 0.4)))
+        nawozy.append(Nawoz(typ: "N_poglowna", ilosc: Int((nitrogenDose-nitrogenLeft-nitrogenfromManure) * 0.5)))
+        p205Demand -= 20
+        k2oDemand -= 30
+        mgoDemand -= 10
+    case "średni":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int((nitrogenDose-nitrogenLeft-nitrogenfromManure) * 0.5)))
+        nawozy.append(Nawoz(typ: "N_poglowna", ilosc: Int((nitrogenDose-nitrogenLeft-nitrogenfromManure) * 0.5)))
+    case "niski":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int((nitrogenDose-nitrogenLeft-nitrogenfromManure) * 0.6)))
+        nawozy.append(Nawoz(typ: "N_poglowna", ilosc: Int((nitrogenDose-nitrogenLeft-nitrogenfromManure) * 0.5)))
+        p205Demand += 20
+        k2oDemand += 30
+        mgoDemand += 10
+            default:
+                break
+            }
+    nawozy.append(Nawoz(typ: "P₂O₅", ilosc: Int(p205Demand)))
+    nawozy.append(Nawoz(typ: "K₂O", ilosc: Int(k2oDemand)))
+    nawozy.append(Nawoz(typ: "MgO", ilosc: Int(mgoDemand)))
+    
+    if pole.slomaNaPolu {
+        nitrogenDose -= oczekiwanyPlon * 5
+        nawozy = nawozy.map { nawoz in
+            switch nawoz.typ {
+            case "P₂O₅":
+                return Nawoz(typ: nawoz.typ, ilosc: Int(p205Demand - p205Left))
+            case "K₂O":
+                return Nawoz(typ: nawoz.typ, ilosc: Int(k2oDemand - k2oLeft))
+            case "MgO":
+                return Nawoz(typ: nawoz.typ, ilosc: Int(mgoDemand - mgoLeft))
+            default:
+                return nawoz
+            }
+            
+            
+        }
+}
+
+            
+    return nawozy
+}
+
+        func doradztwoNawozowePszenica(_ pole: Pole, ph: Double, oczekiwanyPlon: Double, poprzedniPlon: Double, dawkaObornik: Double, poprzedniaDawkaObornik: Double, poprzedniaRoslina: String, poprzedniObornik: String, obornik: String) -> [Nawoz] {
+    func calculateNitrogenDose(_ oczekiwanyPlon: Double) -> Double {
+        var nitrogenDose: Double = 0.0
+        if oczekiwanyPlon <= 2.0 {
+            nitrogenDose = oczekiwanyPlon * 20.0
+        } else {
+            nitrogenDose = (oczekiwanyPlon - 1.0) * 15.0
+        }
+        return nitrogenDose
+    }
+            
+            func calculateNitrogenLeft(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+                var nitrogenLeft: Double = 0.0
+                if poprzedniaRoslina == "pszenica" {
+                    nitrogenLeft = poprzedniPlon * 2.0
+                }
+                else if poprzedniaRoslina == "rzepak" {
+                    nitrogenLeft = poprzedniPlon * 2.0
+                }
+                else {
+                    nitrogenLeft = poprzedniPlon * 2.0
+                }
+                return nitrogenLeft
+            }
+            func calculatep205Left(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+                var p205Left: Double = 0.0
+                if poprzedniaRoslina == "pszenica" {
+                    p205Left = poprzedniPlon * 3.0 }
+                else if poprzedniaRoslina == "rzepak" {
+                    p205Left = poprzedniPlon * 3.0 }
+                else {
+                    p205Left = poprzedniPlon * 2.5 }
+                return p205Left
+            }
+            func calculatek2oLeft(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+                var k2oLeft: Double = 0.0
+                if poprzedniaRoslina == "pszenica" {
+                    k2oLeft = poprzedniPlon * 13.0 }
+                else if poprzedniaRoslina == "rzepak" {
+                    k2oLeft = poprzedniPlon * 20.0 }
+                else {
+                    k2oLeft = poprzedniPlon * 20.0 }
+                return k2oLeft
+            }
+            func calculatemgoLeft(_ poprzedniPlon: Double, poprzedniaRoslina:String) -> Double {
+                var mgoLeft: Double = 0.0
+                if poprzedniaRoslina == "pszenica" {
+                    mgoLeft = poprzedniPlon * 2.0 }
+                else if poprzedniaRoslina == "rzepak" {
+                    mgoLeft = poprzedniPlon * 1.5 }
+                else {
+                    mgoLeft = poprzedniPlon * 2.5 }
+                return mgoLeft
+            }
+            func calculatezawartoscAzotuWOborniku(_ dawkaObornik: Double, obornik: String) -> Double {
+                var zawartoscAzotuWOborniku: Double = 0.0
+                    if obornik == "krowi" {
+                        zawartoscAzotuWOborniku = dawkaObornik * 4.7 * 0.3
+                        p205Demand -= dawkaObornik * 2.8 * 0.4
+                        k2oDemand -= dawkaObornik * 6.5 * 0.5
+                        mgoDemand -= dawkaObornik * 1.5 * 0.3
+                    }
+                    else if obornik == "świński" {
+                        zawartoscAzotuWOborniku = dawkaObornik * 5.1 * 0.3
+                        p205Demand -= dawkaObornik * 4.4 * 0.4
+                        k2oDemand -= dawkaObornik * 6.8 * 0.5
+                        mgoDemand -= dawkaObornik * 1.8 * 0.3
+                    }
+                    else if obornik == "konny" {
+                        zawartoscAzotuWOborniku = dawkaObornik * 5.4 * 0.3
+                        p205Demand -= dawkaObornik * 2.9 * 0.4
+                        k2oDemand -= dawkaObornik * 9.0 * 0.5
+                        mgoDemand -= dawkaObornik * 1.6 * 0.3
+                    }
+                    return zawartoscAzotuWOborniku
+                }
+            func calculatepoprzedniazawartoscAzotuWOborniku(_ poprzedniaDawkaObornik: Double, poprzedniObornik: String) -> Double {
+                var poprzedniazawartoscAzotuWOborniku: Double = 0.0
+                if poprzedniObornik == "krowi" {
+                    poprzedniazawartoscAzotuWOborniku = poprzedniaDawkaObornik * 4.7 * 0.35
+                    p205Demand -= poprzedniaDawkaObornik * 2.8 * 0.3
+                    k2oDemand -= poprzedniaDawkaObornik * 6.5 * 0.3
+                    mgoDemand -= poprzedniaDawkaObornik * 1.5 * 0.3
+                }
+                    else if poprzedniObornik == "świński" {
+                        poprzedniazawartoscAzotuWOborniku = poprzedniaDawkaObornik * 5.1 * 0.3
+                        p205Demand -= poprzedniaDawkaObornik * 4.4 * 0.3
+                        k2oDemand -= poprzedniaDawkaObornik * 6.8 * 0.3
+                        mgoDemand -= poprzedniaDawkaObornik * 1.8 * 0.3}
+                    else if poprzedniObornik == "konny" {
+                        poprzedniazawartoscAzotuWOborniku = poprzedniaDawkaObornik * 5.4 * 0.3
+                        p205Demand -= poprzedniaDawkaObornik * 2.9 * 0.3
+                        k2oDemand -= poprzedniaDawkaObornik * 9.0 * 0.3
+                        mgoDemand -= poprzedniaDawkaObornik * 1.6 * 0.3}
+                    return poprzedniazawartoscAzotuWOborniku
+                }
+
+
+            
+            var p205Demand = oczekiwanyPlon * 11.0
+            var k2oDemand = oczekiwanyPlon * 21.0
+            var mgoDemand = oczekiwanyPlon * 6.0
+            var nitrogenDose = calculateNitrogenDose(oczekiwanyPlon)
+            let nitrogenLeft = calculateNitrogenLeft(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+            let p205Left = calculatep205Left(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+            let k2oLeft = calculatek2oLeft(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+            let mgoLeft = calculatemgoLeft(poprzedniPlon, poprzedniaRoslina: poprzedniaRoslina)
+            let nitrogenfromManure = calculatepoprzedniazawartoscAzotuWOborniku(poprzedniaDawkaObornik, poprzedniObornik: poprzedniObornik) + calculatezawartoscAzotuWOborniku(dawkaObornik, obornik: obornik)
+           
+            var nawozy = [Nawoz]()
+            switch pole.klasaGleby {
+                case "Zyzna":
+                nitrogenDose += 20
+                p205Demand += 30
+                case "Umiarkowana":
+                nitrogenDose += 15
+                p205Demand += 20
+                case "Uboga":
+                nitrogenDose += 10
+                p205Demand += 10
+                    default:
+                return nawozy
+                    }
+            nawozy.append(Nawoz(typ: "P₂O₅", ilosc: Int(p205Demand)))
+            nawozy.append(Nawoz(typ: "K₂O", ilosc: Int(k2oDemand)))
+            nawozy.append(Nawoz(typ: "MgO", ilosc: Int(mgoDemand)))
+            
+            if pole.slomaNaPolu {
+                nitrogenDose -= oczekiwanyPlon * 5
+                nawozy = nawozy.map { nawoz in
+            switch nawoz.typ {
+                case "P₂O₅":
+            return Nawoz(typ: nawoz.typ, ilosc: Int(p205Demand - p205Left))
+                case "K₂O":
+            return Nawoz(typ: nawoz.typ, ilosc: Int(k2oDemand - k2oLeft))
+                case "MgO":
+            return Nawoz(typ: nawoz.typ, ilosc: Int(mgoDemand - mgoLeft))
+               
+            default:
+            return nawoz
+            }
+        }
+    }
+            switch pole.klasaGleby {
+            case "Zyzna":
+                nawozy = nawozy.map { nawoz in
+                    var newNawoz = nawoz
+                    newNawoz.ilosc += 20
+                    return newNawoz
+                }
+            case "Uboga":
+                nawozy = nawozy.map { nawoz in
+                    var newNawoz = nawoz
+                    newNawoz.ilosc -= 20
+                    return newNawoz
+                }
+            default:
+                break
+            }
+    
+    switch pole.poziomZasobnosci {
+    case "wysoki":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin1", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin2", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin3", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        p205Demand -= 20
+        k2oDemand -= 30
+        mgoDemand -= 10
+    case "średni":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin1", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin2", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin3", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+    case "niski":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin1", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin2", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin3", ilosc: Int((nitrogenDose - nitrogenLeft-nitrogenfromManure) * 0.2)))
+        p205Demand += 20
+        k2oDemand += 30
+        mgoDemand += 10
+    default:
+        break
+    }
+
+
+    return nawozy
+}
+
+func doradztwoNawozoweRzepak(_ pole: Pole,oczekiwanyPlon: Double) -> [Nawoz] {
+    func calculateNitrogenDose(_ oczekiwanyPlon: Double) -> Double {
+        var nitrogenDose: Double = 0.0
+        if oczekiwanyPlon <= 6.0 {
+        nitrogenDose = oczekiwanyPlon * 25.0
+        } else {
+        nitrogenDose = (oczekiwanyPlon - 5.0) * 30.0
+        }
+        return nitrogenDose
+    }
+
+
+    let p205Demand = oczekiwanyPlon * 24.0
+    let k2oDemand = oczekiwanyPlon * 50.0
+    var nitrogenDose = calculateNitrogenDose(oczekiwanyPlon)
+
+    var nawozy = [Nawoz]()
+    nawozy.append(Nawoz(typ: "P₂O₅", ilosc: Int(p205Demand)))
+    nawozy.append(Nawoz(typ: "K₂O", ilosc: Int(k2oDemand)))
+    
+    if pole.slomaNaPolu {
+        nitrogenDose -= oczekiwanyPlon * 5
+        nawozy = nawozy.map { nawoz in
+    switch nawoz.typ {
+        case "P₂O₅":
+    return Nawoz(typ: nawoz.typ, ilosc: Int(p205Demand - oczekiwanyPlon * 3))
+        case "K2O":
+    return Nawoz(typ: nawoz.typ, ilosc: Int(k2oDemand - oczekiwanyPlon * 20))
+       
+    default:
+    return nawoz
+    }
+}
+}
+    
+
+    switch pole.poziomZasobnosci {
+    case "wysoki":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int(nitrogenDose * 0.1)))
+        nawozy.append(Nawoz(typ: "N_termin1", ilosc: Int(nitrogenDose * 0.3)))
+        nawozy.append(Nawoz(typ: "N_termin2", ilosc: Int(nitrogenDose * 0.3)))
+        nawozy.append(Nawoz(typ: "N_termin3", ilosc: Int(nitrogenDose * 0.3)))
+    case "średni":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int(nitrogenDose * 0.2)))
+        nawozy.append(Nawoz(typ: "N_termin1", ilosc: Int(nitrogenDose * 0.4)))
+        nawozy.append(Nawoz(typ: "N_termin2", ilosc: Int(nitrogenDose * 0.3)))
+        nawozy.append(Nawoz(typ: "N_termin3", ilosc: Int(nitrogenDose * 0.3)))
+    case "niski":
+        nawozy.append(Nawoz(typ: "N_przedsiewna", ilosc: Int(nitrogenDose * 0.3)))
+        nawozy.append(Nawoz(typ: "N_termin1", ilosc: Int(nitrogenDose * 0.4)))
+        nawozy.append(Nawoz(typ: "N_termin2", ilosc: Int(nitrogenDose * 0.4)))
+        nawozy.append(Nawoz(typ: "N_termin3", ilosc: Int(nitrogenDose * 0.4)))
+    default:
+        break
+    }
+
+    
+    switch pole.klasaGleby {
+    case "Zyzna":
+        nawozy = nawozy.map { nawoz in
+            var newNawoz = nawoz
+            newNawoz.ilosc += 20
+            return newNawoz
+        }
+    case "Uboga":
+        nawozy = nawozy.map { nawoz in
+            var newNawoz = nawoz
+            newNawoz.ilosc -= 20
+            return newNawoz
+        }
+    default:
+        break
+    }
+
+    return nawozy
+}
+func doradztwoPH(klasaGleby: String, ph: Double) -> String {
+    switch klasaGleby {
+    case "Uboga":
+        if ph < 5.5 {
+            return "Zastosuj wapnowanie z wapnem palonym lub nawozem wapniowo-magnezowym w dawce 3-4 t/ha."
+        } else if ph > 7.0 {
+            return "Zastosuj siarczan amonu, siarczan potasu lub nawóz wieloskładnikowy z zasadowym wypełniaczem."
+        } else {
+            return "pH gleby w normie."
+        }
+    case "Umiarkowana":
+        if ph < 5.0 {
+            return "Zastosuj wapnowanie z wapnem palonym lub nawozem wapniowo-magnezowym w dawce 3-4 t/ha."
+        } else if ph > 7.5 {
+            return "Zastosuj siarczan amonu, siarczan potasu lub nawóz wieloskładnikowy z zasadowym wypełniaczem."
+        } else {
+            return "pH gleby w normie."
+        }
+    case "Zyzna":
+        if ph < 5.8 {
+            return "Zastosuj wapnowanie z wapnem palonym lub nawozem wapniowo-magnezowym w dawce 3-4 t/ha."
+        } else if ph > 7.3 {
+            return "Zastosuj siarczan amonu, siarczan potasu lub nawóz wieloskładnikowy z zasadowym wypełniaczem."
+        } else {
+            return "pH gleby w normie."
+        }
+    default:
+        return "Nieznana klasa gleby."
+    }
+}
+func opisNawozow(_ nawozy: [Nawoz], klasaGleby: String, ph: Double) -> String {
+    let opis = doradztwoPH(klasaGleby: klasaGleby, ph: ph)
+    
+    return opis
+}
+
